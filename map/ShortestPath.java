@@ -11,7 +11,7 @@
  *
  ****************************************************************************/
 
-public class ShortestPath {
+ public class ShortestPath {
 
     public static void main(String[] args) {
 
@@ -28,9 +28,16 @@ public class ShortestPath {
         Dijkstra dijkstra = new Dijkstra(G);
         int s = StdIn.readInt();
         int d = StdIn.readInt();
-        dijkstra.showPath(s, d);
-        dijkstra.drawPath(s, d);
+        
+        // A* test
+        long startTime = System.currentTimeMillis();
+        //dijkstra.enableAStar(d);     // Turn on A*
+        dijkstra.compute(s, d);      // Run the algorithm ONCE
+        dijkstra.showPath(d, s);     // Print it
+        dijkstra.drawPath(s, d);     // Draw it
+        long endTime = System.currentTimeMillis();
+        System.out.println("A* runtime: " + (endTime - startTime) + " ms");
+
         Turtle.render();
     }
-
 }
