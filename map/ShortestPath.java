@@ -31,7 +31,7 @@
         
         // A* test
         long startTime = System.currentTimeMillis();
-        //dijkstra.enableAStar(d);     // Turn on A*
+        dijkstra.enableAStar(d);     // Turn on A*
         dijkstra.compute(s, d);      // Run the algorithm ONCE
         dijkstra.showPath(d, s);     // Print it
         dijkstra.drawPath(s, d);     // Draw it

@@ -6,39 +6,47 @@
  import java.awt.Color;
 
  public class Dijkstra {
-     private static double INFINITY = Double.MAX_VALUE;
-     private static double EPSILON  = 0.000001;
+     private static final double INFINITY = Double.MAX_VALUE;
+     private static final double EPSILON   = 0.000001;
      
      private boolean useAStar = false;
-     private int targetNode = -1;  // only used for A* search (change in shortestpath.java file)
+     private int targetNode  = -1;  // only used for A* search
      
-     private EuclideanGraph G;
-     private double[] dist;
-     private int[] pred;
+     private final EuclideanGraph G;
+     private final double[]      dist;
+     private final int[]         pred;
      
+     // ✱ NEW ✱: For resetting only touched vertices per query
+     private int[] seen;
+     private int   queryId = 1;  
+ 
      public Dijkstra(EuclideanGraph G) {
          this.G = G;
+         int V  = G.V();
+         dist = new double[V];
+         pred = new int[V];
+         seen = new int[V];  // default 0 = never seen
      }
      
      // enable A* mode by setting the target (goal) node
      public void enableAStar(int destination) {
-         useAStar = true;
+         useAStar  = true;
          targetNode = destination;
      }
      
-     // compile the algorithm once and store the result
+     // run the algorithm once (caches pred[])
      public void compute(int s, int d) {
          dijkstra(s, d);
      }
      
-     // return the shortest path distance from s to d.
+     // return the shortest path distance from s to d
      public double distance(int s, int d) {
          dijkstra(s, d);
-         return dist[d];
+         // if d was never touched, treat as unreachable
+         return (seen[d] == queryId) ? dist[d] : INFINITY;
      }
      
      // Print the shortest path from s to d.
-     // (Note that we assume compute(s, d) was already called and pred[] is up to date
      public void showPath(int d, int s) {
          if (pred == null || pred[d] == -1) {
              System.out.println(d + " is unreachable from " + s);
@@ -58,46 +66,40 @@
          Turtle.render();
      }
      
-     // plain Dijkstra's algorithm with optional A* modification (changeable in shortestpath.java)
+     // optimized Dijkstra's with early exit + touch-only reset
      private void dijkstra(int s, int d) {
-         int V = G.V();
-         dist = new double[V];
-         pred = new int[V];
-         for (int v = 0; v < V; v++) {
-             dist[v] = INFINITY;
-             pred[v] = -1;
-         }
+         queryId++;  // start a new query
+         IndexPQ pq = new IndexPQ(G.V());
          
-         IndexPQ pq = new IndexPQ(V);
-         for (int v = 0; v < V; v++) {
-             pq.insert(v, dist[v]);
-         }
-         
-         dist[s] = 0.0;
-         pred[s] = s;
-         pq.change(s, dist[s]);
+         // initialize only source vertex
+         dist[s]     = 0.0;
+         pred[s]     = s;
+         seen[s]     = queryId;
+         pq.insert(s, 0.0);
          
          while (!pq.isEmpty()) {
              int v = pq.delMin();
-             // stop when we reach the destination node.
              if (v == d) break;
              
-             IntIterator it = G.neighbors(v);
-             while (it.hasNext()) {
+             for (IntIterator it = G.neighbors(v); it.hasNext(); ) {
                  int w = it.next();
                  double baseCost = dist[v] + G.distance(v, w);
-                 double fCost;
                  if (useAStar) {
-                     // standard A* evaluation: f(n) = g(n) + h(n)
-                     fCost = baseCost + G.distance(w, targetNode);
-                 } else {
-                     fCost = baseCost;
+                     // A* heuristic adjustment
+                     baseCost += G.distance(w, targetNode)
+                               - G.distance(v, targetNode);
                  }
                  
-                 if (baseCost < dist[w] - EPSILON) {
+                 // if unseen or found shorter path
+                 if (seen[w] != queryId || baseCost < dist[w] - EPSILON) {
                      dist[w] = baseCost;
                      pred[w] = v;
-                     pq.change(w, fCost);
+                     if (seen[w] != queryId) {
+                         pq.insert(w, baseCost);
+                     } else {
+                         pq.change(w, baseCost);
+                     }
+                     seen[w] = queryId;
                  }
              }
          }
