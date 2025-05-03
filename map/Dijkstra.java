@@ -76,6 +76,11 @@
          Turtle.render();
      }
  
+     // estimate memory usage of seen[] array
+     public int seenMemoryBytes() {
+         return seen.length * Integer.BYTES;
+     }
+ 
      // optimized Dijkstra's 
      private void dijkstra(int s, int d) {
          queryId++;  // start a new query
@@ -106,7 +111,7 @@
  
                  // if unseen or found shorter path
                  // if seen[w] != queryId, dist[w] and pred[w] may be garbage from an old query,
-                // so we enter this block unconditionally the first time:
+                 // so we enter this block unconditionally the first time:
                  if (seen[w] != queryId || baseCost < dist[w] - EPSILON) {
                     // first touch OR found a better path
                      dist[w] = baseCost;
@@ -126,4 +131,3 @@
          useAStar = false;
      }
  }
- 

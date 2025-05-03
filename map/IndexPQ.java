@@ -16,6 +16,14 @@
     private int[] qp;           // inverse: qp[pq[i]] = i
     private double[] priority;  // priority[k] = value for key k
 
+
+    //tracking metrics
+    public static int insertCount = 0;
+    public static int changeCount = 0;
+    public static int delMinCount = 0;
+    public static int maxPQSize = 0;
+
+
     public IndexPQ(int maxN) {
         pq = new int[maxN + 1];
         qp = new int[maxN + 1];
@@ -32,10 +40,12 @@
         pq[N] = k;
         priority[k] = val;
         fixUp(N);
+        maxPQSize = Math.max(maxPQSize, N);
     }
 
     // remove and return the key with smallest priority
     public int delMin() {
+        delMinCount++;
         int min = pq[1];
         exch(1, N);
         N--;
@@ -45,6 +55,7 @@
 
     // decrease/increase the priority of key k
     public void change(int k, double val) {
+        changeCount++;
         priority[k] = val;
         int idx = qp[k];
         fixUp(idx);
