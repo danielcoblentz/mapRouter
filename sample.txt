@@ -1,0 +1,2 @@
+javac *.java
+java Paths usa.txt < usa-50000short.txt

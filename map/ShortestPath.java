@@ -7,7 +7,7 @@
  *  and plots the shortest path from s to d using turtle graphics.
  *
  *  % java ShortestPath usa.txt
- *  0 5000
+ * 
  *
  ****************************************************************************/
 
@@ -31,10 +31,10 @@
         
         // A* test
         long startTime = System.currentTimeMillis();
-        dijkstra.enableAStar(d);     // Turn on A*
-        dijkstra.compute(s, d);      // Run the algorithm ONCE
-        dijkstra.showPath(d, s);     // Print it
-        dijkstra.drawPath(s, d);     // Draw it
+        dijkstra.enableAStar(d);     // turn on A*
+        dijkstra.compute(s, d);      // run the algorithm 
+        dijkstra.showPath(d, s);     
+        dijkstra.drawPath(s, d);     
         long endTime = System.currentTimeMillis();
         System.out.println("A* runtime: " + (endTime - startTime) + " ms");
 

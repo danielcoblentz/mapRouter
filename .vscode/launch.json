@@ -6,6 +6,15 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Paths",
+            "request": "launch",
+            "mainClass": "Paths",
+            "projectName": "mapRouter_eb928563",
+            "args": "/usa.txt"          
+
+        },
+        {
+            "type": "java",
             "name": "ShortestPath",
             "request": "launch",
             "mainClass": "ShortestPath",

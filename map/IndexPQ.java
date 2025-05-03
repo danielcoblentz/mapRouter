@@ -6,81 +6,89 @@
  *
  *  This code is from "Algorithms in Java, Third Edition,
  *  by Robert Sedgewick, Addison-Wesley, 2003.
+ *
 
  *********************************************************************/
 
-public class IndexPQ {
+ public class IndexPQ {
     private int N;              // number of elements on PQ
-    private int[] pq;           // binary heap
-    private int[] qp;           //
-    private double[] priority;  // priority values
+    private int[] pq;           // heap, 1-based: pq[1] is min
+    private int[] qp;           // inverse: qp[pq[i]] = i
+    private double[] priority;  // priority[k] = value for key k
 
-    public IndexPQ(int NMAX) {
-        pq = new int[NMAX + 1];
-        qp = new int[NMAX + 1];
-        priority = new double[NMAX + 1]; 
+    public IndexPQ(int maxN) {
+        pq = new int[maxN + 1];
+        qp = new int[maxN + 1];
+        priority = new double[maxN + 1];
         N = 0;
     }
 
     public boolean isEmpty() { return N == 0; }
 
-    // insert element k with given priority
-    public void insert(int k, double value) {
+    // insert key k with given priority
+    public void insert(int k, double val) {
         N++;
         qp[k] = N;
         pq[N] = k;
-        priority[k] = value;
-        fixUp(pq, N);
+        priority[k] = val;
+        fixUp(N);
     }
 
-    // delete and return the minimum element
-    public int delMin() { 
-        exch(pq[1], pq[N]); 
-        fixDown(pq, 1, --N); 
-        return pq[N+1]; 
+    // remove and return the key with smallest priority
+    public int delMin() {
+        int min = pq[1];
+        exch(1, N);
+        N--;
+        fixDown(1);
+        return min;
     }
 
-    // change the priority of element k to specified value
-    public void change(int k, double value) {
-        priority[k] = value;
-        fixUp(pq, qp[k]);
-        fixDown(pq, qp[k], N);
+    // decrease/increase the priority of key k
+    public void change(int k, double val) {
+        priority[k] = val;
+        int idx = qp[k];
+        fixUp(idx);
+        fixDown(idx);
     }
 
-
-   /**************************************************************
-    * General helper functions
-    **************************************************************/
-    private boolean greater(int i, int j) {
-        return priority[i] > priority[j];
-    }
-
+    // swap pq[i] and pq[j]
     private void exch(int i, int j) {
-        int t = qp[i]; qp[i] = qp[j]; qp[j] = t;
-        pq[qp[i]] = i; pq[qp[j]] = j;
+        int a = pq[i]; pq[i] = pq[j]; pq[j] = a;
+        qp[pq[i]] = i;
+        qp[pq[j]] = j;
     }
 
+    // true if priority[pq[i]] > priority[pq[j]]
+    private boolean greater(int i, int j) {
+        return priority[pq[i]] > priority[pq[j]];
+    }
 
-   /**************************************************************
-    * Heap helper functions
-    **************************************************************/
-    private void fixUp(int[] a, int k)  {
-        while (k > 1 && greater(a[k/2], a[k])) {
-            exch(a[k], a[k/2]);
-            k = k/2;
+    // move item at k up until heap-order restored (used after insertion)
+    private void fixUp(int k) {
+        while (k > 1) {
+            int parent = (k + 2) / 4;    
+            if (!greater(parent, k)) break;
+            exch(parent, k);
+            k = parent;
         }
     }
 
-    private void fixDown(int[] a, int k, int N) {
-        int j;
-        while (2*k <= N) {
-            j = 2*k;
-            if (j < N && greater(a[j], a[j+1])) j++;
-            if (!greater(a[k], a[j])) break;
-            exch(a[k], a[j]);
-            k = j;
+    // move item at k down until heap-order restored(used after removnig the min)
+    private void fixDown(int k) {
+        while (true) {
+            int firstChild = 4 * (k - 1) + 2;  // index of first of up to 4 children
+            if (firstChild > N) break;
+            // find smallest among up to 4 children
+            int best = firstChild;
+            for (int offset = 1; offset < 4; offset++) {
+                int idx = firstChild + offset;
+                if (idx <= N && greater(best, idx)) {
+                    best = idx;
+                }
+            }
+            if (!greater(k, best)) break;
+            exch(k, best);
+            k = best;
         }
     }
-
-
 }
